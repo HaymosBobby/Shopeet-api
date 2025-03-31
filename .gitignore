@@ -1,0 +1,14 @@
+config/
+
+node_modules/
+
+dist/
+
+.env
+
+.txt
+
+# Ignore .log files
+*.log
+
+.DS_Store
