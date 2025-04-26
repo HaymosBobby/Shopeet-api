@@ -125,11 +125,11 @@ export const generateOTP = (): string => {
 export const sendMail = async (
   email: string,
   subject: string,
-  message: string,
-  welcome: boolean
+  message: string
+  // welcome: boolean
 ) => {
   const mailOptions = {
-    from: `${welcome ? "Matthew" : "Nodepay"} <noreply@nodepay.com>`,
+    from: `admin <noreply@shopeet.com>`,
     to: email,
     subject: subject,
     html: message,

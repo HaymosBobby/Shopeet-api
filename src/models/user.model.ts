@@ -1,38 +1,54 @@
-import mongoose, { Document, model, Schema } from "mongoose";
+import { Schema, Document, model, Types } from "mongoose";
+import bcrypt from "bcrypt";
 
-interface UserInterface extends Document {
-  firstName: string;
-  lastName: string;
+export interface IUser extends Document {
   email: string;
-  mobile: string;
   password: string;
+  role: "customer" | "admin" | "vendor";
+  isActive: boolean;
+  emailVerified: boolean;
+  verificationToken?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+  lastLogin?: Date;
+  profile?: Types.ObjectId;
+  activeCart?: Types.ObjectId;
+  defaultAddress?: Types.ObjectId;
 }
 
-// Declare the Schema of the Mongo model
-const userSchema = new Schema<UserInterface>({
-  firstName: {
-    type: String,
-    required: true,
+const UserSchema = new Schema<IUser>(
+  {
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ["customer", "admin", "vendor"],
+      default: "customer",
+    },
+    isActive: { type: Boolean, default: true },
+    emailVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
+    lastLogin: { type: Date },
+    profile: { type: Schema.Types.ObjectId, ref: "Profile" },
+    activeCart: { type: Schema.Types.ObjectId, ref: "Cart" },
+    defaultAddress: { type: Schema.Types.ObjectId, ref: "Address" },
   },
-  lastName: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  mobile: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
+  { timestamps: true }
+);
+
+// Hash password
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
-//Export the model
-const User = model<UserInterface>("User", userSchema);
+// Compare password
+UserSchema.methods.comparePassword = async function (userPassword: string) {
+  return await bcrypt.compare(userPassword, this.password);
+};
+
+const User = model<IUser>("User", UserSchema);
+export default User;
