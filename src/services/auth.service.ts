@@ -1,14 +1,9 @@
 import Otp, { useForType } from "../models/otp.model";
 import User from "../models/user.model";
+import { OtpType } from "../schema/auth.schema";
 import { generateOTP, sendMail, throwError } from "../util/helper";
 
-export const sendOtpService = async ({
-  email,
-  useFor,
-}: {
-  email: string;
-  useFor: useForType;
-}) => {
+export const sendOtpService = async ({ email, useFor }: OtpType) => {
   // Check if user exists based on useFor
   if (useFor === "registration") {
     const existingUser = await User.findOne({ email });
@@ -53,3 +48,5 @@ export const sendOtpService = async ({
 
   return { message: "OTP sent successfully", otp };
 };
+
+export const registrationService = async ({ body }) => {};
